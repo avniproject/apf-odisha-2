@@ -29,32 +29,5 @@ clean:
 deps: set_node_version
 	yarn install
 
-check-project-versions:
-	npm search openchs-models
-
-build: set_node_version
-	yarn run build
-
-tests: set_node_version build
+tests: set_node_version
 	yarn test
-
-ci-build:
-	yarn install
-	yarn run build
-	yarn test
-
-release:
-	git pull --tags
-	git pull --rebase
-	yarn version --patch
-	@echo "   Now please run \nmake publish"
-
-publish:
-	git push && git push origin --tags
-
-deploy-local:
-ifeq ($(local),)
-	@echo -e '\nPlease provide the local location of node modules where to install. e.g. local=../avni-web-app/ or local=../avni-client/packages/openchs-android \n'
-	@exit 1
-endif
-	$(call _deploy,$(local)/node_modules/avni-health-modules/dist)
