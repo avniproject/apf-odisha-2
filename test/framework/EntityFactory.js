@@ -15,8 +15,11 @@ import {
 } from 'openchs-models';
 import _ from "lodash";
 
-function addCodedAnswers(concept, answers) {
-    _.forEach(answers, (answer) => concept.addAnswer(EntityFactory.createConcept(answer, Concept.dataType.NA)));
+function addCodedAnswers(concept, answerConceptNames) {
+    _.forEach(answerConceptNames, (answer) => {
+        const answerConcept = EntityFactory.createConcept({name: answer, dataType: Concept.dataType.NA});
+        concept.addAnswer(answerConcept);
+    });
 }
 
 class EntityFactory {
@@ -62,14 +65,15 @@ class EntityFactory {
         return formElement;
     }
 
-    static createConcept({name, dataType, uuid}) {
+    static createConcept({name, dataType, uuid = General.randomUUID()}) {
         const concept = Concept.create(name, dataType);
         concept.uuid = uuid || General.randomUUID();
+        concept.answers = [];
         return concept;
     }
 
     static createCodedConceptWithAnswers(conceptName, answers) {
-        const concept = EntityFactory.createConcept(conceptName, Concept.dataType.Coded);
+        const concept = EntityFactory.createConcept({name: conceptName, dataType: Concept.dataType.Coded});
         addCodedAnswers(concept, answers);
         return concept;
     }
