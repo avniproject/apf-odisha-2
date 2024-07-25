@@ -48,7 +48,7 @@ export default function ({params, imports}) {
         const noQrtEncountersScheduled = scheduledOrCompletedEncountersOfType("QRT PW", qrtDate).length == 0;
         const isSevereAnemic = new imports.rulesConfig.RuleCondition({programEncounter}).when.valueInEncounter("68bc6e51-eb49-4816-b78b-2427bbab8d92").lessThan(7).matches();
         const requiresMedicalInterventionTreatment = new imports.rulesConfig.RuleCondition({programEncounter}).when.latestValueInEntireEnrolment("35f880ca-60b5-4240-97e1-813c0a7a78c4").containsAnswerConceptName("8ebbf088-f292-483e-9084-7de919ce67b7").matches();
-        const anmRecommendedMedicalFacilityIntervention = new imports.rulesConfig.RuleCondition({programEncounter}).when.valueInEncounter("f7cc4fd5-5c66-4695-b5e3-1d83c3621f5d").containsAnswerConceptName("8ebbf088-f292-483e-9084-7de919ce67b7").matches();
+        const anmRecommendedMedicalFacilityIntervention = new imports.rulesConfig.RuleCondition({programEncounter}).when.valueInEncounter("Did the ANM recommend for a medical facility intervention?").containsAnswerConceptName("Yes").matches();
         const qrtEligibility = isSevereAnemic || requiresMedicalInterventionTreatment || anmRecommendedMedicalFacilityIntervention;
         const ancEncounter = lastfilledEncounter('ANC');
         const isEditScenario = ancEncounter ? ancEncounter.uuid === programEncounter.uuid : false;
