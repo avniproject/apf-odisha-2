@@ -33,7 +33,7 @@
     ]
   },
   "dependencies": {
-    "yarn": "^1.22.22"
+    "rules-config": "github:openchs/rules-config#a35ade353300f8dde3a20af4234b49036e2fda16"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -53,13 +53,11 @@
     "jest": "^26.6.3",
     "lodash": "4.17.11",
     "moment": "2.19.3",
-    "openchs-models": "latest",
-    "rules-config": "github:openchs/rules-config#a35ade353300f8dde3a20af4234b49036e2fda16"
+    "openchs-models": "latest"
   },
   "peerDependencies": {
     "lodash": "*",
     "moment": "*",
-    "openchs-models": "*",
-    "rules-config": "*"
+    "openchs-models": "*"
   }
 }

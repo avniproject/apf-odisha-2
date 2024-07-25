@@ -22,6 +22,7 @@ it('should ', function () {
         observations: [EntityFactory.createObservation(hbConcept, 12),
              EntityFactory.createCodedObservation(anmRecommendedMedicalFacilityInterventionConcept, 'Yes')]
     });
+
     const params = {entity: programEncounter};
     const scheduleBuilder = Anc({
         params: params,

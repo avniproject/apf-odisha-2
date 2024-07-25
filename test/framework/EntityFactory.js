@@ -23,6 +23,8 @@ function addCodedAnswers(concept, answerConceptNames) {
 }
 
 class EntityFactory {
+    static concepts = new Map();
+
     static createIndividual(name) {
         let individual = new Individual();
         individual.uuid = General.randomUUID();
@@ -69,6 +71,7 @@ class EntityFactory {
         const concept = Concept.create(name, dataType);
         concept.uuid = uuid || General.randomUUID();
         concept.answers = [];
+        EntityFactory.concepts.set(concept.name, concept);
         return concept;
     }
 
@@ -104,7 +107,8 @@ class EntityFactory {
     static createCodedObservation(concept, value) {
         const observation = new Observation();
         observation.concept = concept;
-        observation.valueJSON = JSON.stringify(new SingleCodedValue(value));
+        const answerConcept = EntityFactory.concepts.get(value);
+        observation.valueJSON = JSON.stringify(new SingleCodedValue(answerConcept.uuid));
         return observation;
     }
 
