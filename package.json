@@ -32,7 +32,9 @@
       "/node_modules/(?!rules-config).+\\.js$"
     ]
   },
-  "dependencies": {},
+  "dependencies": {
+    "yarn": "^1.22.22"
+  },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
