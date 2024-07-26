@@ -68,6 +68,9 @@ class EntityFactory {
     }
 
     static createConcept({name, dataType, uuid = General.randomUUID()}) {
+        if (EntityFactory.concepts.has(name))
+            return EntityFactory.concepts.get(name);
+
         const concept = Concept.create(name, dataType);
         concept.uuid = uuid || General.randomUUID();
         concept.answers = [];

@@ -48,6 +48,7 @@ export default function ({params, imports}) {
         const noQrtEncountersScheduled = scheduledOrCompletedEncountersOfType("QRT PW", qrtDate).length == 0;
         const isSevereAnemic = new imports.rulesConfig.RuleCondition({programEncounter}).when.valueInEncounter("68bc6e51-eb49-4816-b78b-2427bbab8d92").lessThan(7).matches();
         const requiresMedicalInterventionTreatment = new imports.rulesConfig.RuleCondition({programEncounter}).when.latestValueInEntireEnrolment("Is there a medical facillity intervention required for treatment?").containsAnswerConceptName("Yes").matches();
+        // should be true
         const anmRecommendedMedicalFacilityIntervention = new imports.rulesConfig.RuleCondition({programEncounter}).when.valueInEncounter("Did the ANM recommend for a medical facility intervention?").containsAnswerConceptName("Yes").matches();
         const qrtEligibility = isSevereAnemic || requiresMedicalInterventionTreatment || anmRecommendedMedicalFacilityIntervention;
         const ancEncounter = lastfilledEncounter('ANC');

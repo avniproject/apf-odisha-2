@@ -1,11 +1,13 @@
-import {expect, jest, it, beforeEach} from "@jest/globals";
+import {beforeEach, expect, it} from "@jest/globals";
 import Anc from '../src/visitSchedules/anc';
 import EntityFactory from "./framework/EntityFactory";
-import {VisitScheduleBuilder, RuleCondition} from "rules-config/rules";
-import moment from "moment";
+import {RuleCondition, VisitScheduleBuilder} from "rules-config/rules";
+import _ from "lodash";
+import {afterMonths, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
 
 describe('ANC', function () {
-    let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept, requiresMedicalInterventionTreatmentConcept, highRiskConditionConcept;
+    let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept, requiresMedicalInterventionTreatmentConcept, highRiskConditionConcept,
+        enrolment;
 
     beforeEach(() => {
         anc = EntityFactory.createEncounterType({name: "ANC"});
@@ -67,43 +69,55 @@ describe('ANC', function () {
         )
 
         individual = EntityFactory.createIndividual({name: "Test"});
-    });
-
-    it('should ', function () {
-        const enrolment = EntityFactory.createEnrolment({
+        enrolment = EntityFactory.createEnrolment({
             observations: [],
             programExitDateTime: null,//moment(),
             individual,
             program: EntityFactory.createProgram({name: "Pregnancy"})
         });
+    });
 
-        const programEncounter = EntityFactory.createProgramEncounter({
+    function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, earliestVisit = new Date()}) {
+        const observations = [];
+        if (!_.isNil(hb))
+            observations.push(EntityFactory.createObservation(hbConcept, hb));
+        if (!_.isNil(ancRecommendedMedical))
+            observations.push(EntityFactory.createCodedObservation(anmRecommendedMedicalFacilityInterventionConcept, ancRecommendedMedical));
+        if (!_.isNil(requiresMedicalIntervention))
+            observations.push(EntityFactory.createCodedObservation(requiresMedicalInterventionTreatmentConcept, requiresMedicalIntervention));
+        if (!_.isNil(highRiskCondition))
+            observations.push(EntityFactory.createCodedObservation(highRiskConditionConcept, highRiskCondition));
+
+        return EntityFactory.createProgramEncounter({
             encounterType: anc,
             programEnrolment: enrolment,
-            observations: [EntityFactory.createObservation(hbConcept, 12),
-                EntityFactory.createCodedObservation(anmRecommendedMedicalFacilityInterventionConcept, 'Yes'),
-                EntityFactory.createCodedObservation(requiresMedicalInterventionTreatmentConcept, 'No'),
-                EntityFactory.createCodedObservation(highRiskConditionConcept, 'BMI less than 18.5')]
+            observations: observations
         });
+    }
 
-        const nextDate = moment(programEncounter.earliestVisitDateTime).add(1, 'M').startOf('month').toDate();
-        const anc1Encounter = EntityFactory.createProgramEncounter({
+    function scheduledANC({scheduledDate}) {
+        return EntityFactory.createProgramEncounter({
             encounterType: anc,
             programEnrolment: enrolment,
             encounterDateTime: null,
-            earliestDateTime: nextDate,
+            earliestDateTime: scheduledDate,
             observations: []
         });
+    }
 
-        const deliveryEncounter = EntityFactory.createProgramEncounter({
+    function scheduledDelivery({scheduledDate}) {
+        return EntityFactory.createProgramEncounter({
             encounterType: delivery,
             programEnrolment: enrolment,
             encounterDateTime: null,
+            earliestDateTime: scheduledDate,
             observations: []
         });
+    }
 
-        const params = {entity: programEncounter, deliveryEncounter, anc1Encounter};
-        const scheduleBuilder = Anc({
+    function perform(visit) {
+        const params = {entity: visit};
+        const scheduledVisits = Anc({
             params: params,
             imports: {
                 rulesConfig: {VisitScheduleBuilder: VisitScheduleBuilder, RuleCondition: RuleCondition},
@@ -111,32 +125,27 @@ describe('ANC', function () {
                 lodash: require('lodash')
             }
         });
-        console.log(scheduleBuilder);
+        console.log(scheduledVisits);
+        return {
+            anc: _.find(scheduledVisits, (visit) => visit.encounterType === 'ANC'),
+            pw: _.find(scheduledVisits, (visit) => visit.encounterType === 'PW Home Visit'),
+            qrt: _.find(scheduledVisits, (visit) => visit.encounterType === 'QRT PW')
+        };
+    }
 
-        const ancEarliestDate = moment(programEncounter.earliestVisitDateTime).add(1, 'M').startOf('month').toDate();
-        const maxVisitDate = moment(ancEarliestDate).endOf('month').toDate();
+    it('should ', function () {
+        scheduledANC({scheduledDate: firstOfNextMonth()});
+        scheduledDelivery({scheduledDate: afterMonths(7)});
 
-        const pwEarliestDate = moment(programEncounter.earliestVisitDateTime).add(1, 'M').startOf('month').toDate();
-        const pwMaxVisitDate = moment(pwEarliestDate).add(7, 'days').toDate()
+        const {anc, pw, qrt} = perform(ancVisit({
+            hb: 12,
+            ancRecommendedMedical: 'Yes',
+            highRiskCondition: 'BMI less than 18.5',
+            requiresMedicalIntervention: 'No'
+        }));
 
-
-        expect(scheduleBuilder).toMatchSnapshot(
-            [
-                {
-                    name: 'ANC',
-                    encounterType: 'ANC',
-                    earliestDate: ancEarliestDate,
-                    maxDate: maxVisitDate
-                },
-                {
-                    name: 'PW Home Visit',
-                    encounterType: 'PW Home Visit',
-                    earliestDate: pwEarliestDate,
-                    maxDate: pwMaxVisitDate
-                }
-            ]
-        )
-
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
     })
 });
 

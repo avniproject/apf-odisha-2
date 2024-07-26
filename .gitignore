@@ -37,3 +37,4 @@ node_modules
 lib
 dist
 docs
+/test/__snapshots__/ANCTest.js.snap
