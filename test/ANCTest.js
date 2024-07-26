@@ -75,6 +75,7 @@ describe('ANC', function () {
             individual,
             program: EntityFactory.createProgram({name: "Pregnancy"})
         });
+        scheduledDelivery({scheduledDate: afterMonths(7)});
     });
 
     function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, earliestVisit = new Date()}) {
@@ -128,50 +129,53 @@ describe('ANC', function () {
         console.log(scheduledVisits);
         return {
             anc: _.find(scheduledVisits, (visit) => visit.encounterType === 'ANC'),
-            pw: _.find(scheduledVisits, (visit) => visit.encounterType === 'PW Home Visit'),
+            pwHome: _.find(scheduledVisits, (visit) => visit.encounterType === 'PW Home Visit'),
             qrt: _.find(scheduledVisits, (visit) => visit.encounterType === 'QRT PW')
         };
     }
-// Case 0
-    it('Edit ANC 1 when ANC 2 is already scheduled', function () {
-         scheduledANC({scheduledDate: firstOfNextMonth()});
-        scheduledDelivery({scheduledDate: afterMonths(7)});
 
-        const {anc, pw, qrt} = perform(ancVisit({
+    function notScheduled(...visits) {
+        visits.forEach(visit => expect(_.isNil(visit)).toBeTruthy());
+    }
+
+    it('Case - 1', function () {
+        // Given
+        scheduledANC({scheduledDate: firstOfNextMonth()});
+        ancVisit({
+            hb: 12,
+            ancRecommendedMedical: 'Yes',
+            highRiskCondition: 'BMI less than 18.5',
+            requiresMedicalIntervention: 'No'
+        });
+
+        // When
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: 'BMI less than 18.5',
             requiresMedicalIntervention: 'No'
         }));
 
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
-    })
+        // Then
+        notScheduled(pwHome);
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
+    });
 
-    // Case 1
-    it('GeographicHighRisk:No, ClinicallyHighRisk:no, ancRecommendedMedical:No ,requiresMedicalIntervention:No Severe Anemic:No', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 2', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
             highRiskCondition: null,
             requiresMedicalIntervention: 'No'
         }));
 
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+        notScheduled(pwHome, qrt);
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+    });
 
-    })
-
-    // Case 2
-    it('GeographicHighRisk:No, ClinicallyHighRisk:yes, ancRecommendedMedical:No ,requiresMedicalIntervention:No Severe Anemic:No', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 3', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
             highRiskCondition: 'Age at marriage is less than 19 years',
@@ -181,15 +185,11 @@ describe('ANC', function () {
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(pw.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+        expect(new Date(pwHome.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+    });
 
-    })
-
-    // Case 2
-    it('GeographicHighRisk:No, ClinicallyHighRisk:yes, ancRecommendedMedical:No ,requiresMedicalIntervention:No Severe Anemic:No', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 4', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
             highRiskCondition: 'Age at marriage is less than 19 years',
@@ -199,15 +199,11 @@ describe('ANC', function () {
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(pw.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+        expect(new Date(pwHome.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+    });
 
-    })
-
-    // Case 3
-    it('GeographicHighRisk:No, ClinicallyHighRisk:yes, ancRecommendedMedical:No ,requiresMedicalIntervention:Yes, Severe Anemic:Yes', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 5', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 6,
             ancRecommendedMedical: 'No',
             highRiskCondition: 'HB is less than 7 g/dL',
@@ -218,14 +214,10 @@ describe('ANC', function () {
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
         expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+    });
 
-    })
-
-    // Case 4
-    it('GeographicHighRisk:Yes, ClinicallyHighRisk:Yes, ancRecommendedMedical:Yes ,requiresMedicalIntervention:Yes, Severe Anemic:Yes', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 6', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 6,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: 'HB is less than 7 g/dL',
@@ -236,14 +228,10 @@ describe('ANC', function () {
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
         expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+    });
 
-    })
-
-    // Case 5
-    it('GeographicHighRisk:Yes, ClinicallyHighRisk:No, ancRecommendedMedical:Yes ,requiresMedicalIntervention:No, Severe Anemic:No', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 7', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: null,
@@ -254,14 +242,10 @@ describe('ANC', function () {
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
         expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+    });
 
-    })
-
-    // Case 6
-    it('GeographicHighRisk:Yes, ClinicallyHighRisk:Yes, ancRecommendedMedical:No ,requiresMedicalIntervention:No, Severe Anemic:No', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 8', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
             highRiskCondition: 'Age at marriage is less than 19 years',
@@ -271,15 +255,11 @@ describe('ANC', function () {
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(pw.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+        expect(new Date(pwHome.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+    });
 
-    })
-
-    // Case 7
-    it('GeographicHighRisk:Yes, ClinicallyHighRisk:Yes, ancRecommendedMedical:Yes ,requiresMedicalIntervention:No, Severe Anemic:Yes', function () {
-        scheduledDelivery({scheduledDate: afterMonths(7)});
-
-        const {anc, pw, qrt} = perform(ancVisit({
+    it('Case - 9', function () {
+        const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 5,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
@@ -290,8 +270,7 @@ describe('ANC', function () {
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
         expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
-
-    })
+    });
 });
 
 
