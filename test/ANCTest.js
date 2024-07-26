@@ -142,7 +142,7 @@ describe('ANC', function () {
         // Given
         scheduledANC({scheduledDate: firstOfNextMonth()});
         ancVisit({
-            hb: 12,
+            hb: 11,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: 'BMI less than 18.5',
             requiresMedicalIntervention: 'No'
