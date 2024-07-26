@@ -133,7 +133,7 @@ describe('ANC', function () {
         };
     }
 
-    it('should ', function () {
+    it('Edit ANC 1 when ANC 2 is already scheduled', function () {
         scheduledANC({scheduledDate: firstOfNextMonth()});
         scheduledDelivery({scheduledDate: afterMonths(7)});
 
