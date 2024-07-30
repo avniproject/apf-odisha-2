@@ -6,10 +6,9 @@ import _ from "lodash";
 import {afterMonths, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
 import {ModelGeneral} from "openchs-models";
 
-describe('ANC', function () {
+describe('Visit Scheduling', function () {
     let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept,
-        requiresMedicalInterventionTreatmentConcept, highRiskConditionConcept,
-        enrolment;
+        requiresMedicalInterventionTreatmentConcept, highRiskConditionConcept, enrolment;;
 
     beforeEach(() => {
         anc = EntityFactory.createEncounterType({name: "ANC"});
@@ -68,16 +67,8 @@ describe('ANC', function () {
                 'Thalassemia',
                 'Weight is less than 37kg'
             ]
-        )
-
+        );
         individual = EntityFactory.createIndividual({name: "Test"});
-        enrolment = EntityFactory.createEnrolment({
-            observations: [],
-            programExitDateTime: null,//moment(),
-            individual,
-            program: EntityFactory.createProgram({name: "Pregnancy"})
-        });
-
     });
 
     function createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention}) {
@@ -172,138 +163,151 @@ describe('ANC', function () {
         visits.forEach(visit => expect(_.isNil(visit)).toBeTruthy());
     }
 
-    it('Case - 1', function () {
-        // Given
-        scheduledANC({scheduledDate: firstOfNextMonth()});
-        const anc1 = ancVisit({
-            hb: 11,
-            ancRecommendedMedical: 'Yes',
-            highRiskCondition: 'BMI less than 18.5',
-            requiresMedicalIntervention: 'No'
+    describe('ANC - Visit Scheduling', function () {
+        beforeEach(() => {
+            enrolment = EntityFactory.createEnrolment({
+                observations: [],
+                programExitDateTime: null,//moment(),
+                individual,
+                program: EntityFactory.createProgram({name: "Pregnancy"})
+            });
         });
 
-        // When
-        const {anc, pwHome, qrt} = editAnc(anc1, {hb: 12});
+        it('Case - 1', function () {
+            // Given
+            scheduledANC({scheduledDate: firstOfNextMonth()});
+            const anc1 = ancVisit({
+                hb: 11,
+                ancRecommendedMedical: 'Yes',
+                highRiskCondition: 'BMI less than 18.5',
+                requiresMedicalIntervention: 'No'
+            });
 
-        // Then
-        notScheduled(pwHome, anc);
-    });
+            // When
+            const {anc, pwHome, qrt} = editAnc(anc1, {hb: 12});
 
-    it('Case - 2', function () {
-        // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 12,
-            ancRecommendedMedical: 'No',
-            highRiskCondition: null,
-            requiresMedicalIntervention: 'No'
-        }));
-
-        // Then
-        notScheduled(pwHome, qrt);
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-    });
-
-    it('Case - 3', function () {
-        // Given
-        const anc1 = ancVisit({
-            hb: 11,
-            ancRecommendedMedical: 'No',
-            highRiskCondition: 'BMI less than 18.5',
-            requiresMedicalIntervention: 'No'
+            // Then
+            notScheduled(pwHome, anc);
         });
 
-        // When
-        const {anc, pwHome, qrt} = editAnc(anc1, {});
+        it('Case - 2', function () {
+            // When
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 12,
+                ancRecommendedMedical: 'No',
+                highRiskCondition: null,
+                requiresMedicalIntervention: 'No'
+            }));
 
-        // Then
-        notScheduled(qrt, pwHome);
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+            // Then
+            notScheduled(pwHome, qrt);
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        });
+
+        it('Case - 3', function () {
+            // Given
+            const anc1 = ancVisit({
+                hb: 11,
+                ancRecommendedMedical: 'No',
+                highRiskCondition: 'BMI less than 18.5',
+                requiresMedicalIntervention: 'No'
+            });
+
+            // When
+            const {anc, pwHome, qrt} = editAnc(anc1, {});
+
+            // Then
+            notScheduled(qrt, pwHome);
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        });
+
+        it('Case - 4', function () {
+
+            //When
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 12,
+                ancRecommendedMedical: 'No',
+                highRiskCondition: 'Age at marriage is less than 19 years',
+                requiresMedicalIntervention: 'Yes'
+            }));
+
+            //Then
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+            dateAreEqual(qrt.earliestDate, today());
+        });
+
+        it('Case - 5', function () {
+
+            //When
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 6,
+                ancRecommendedMedical: 'No',
+                highRiskCondition: 'HB is less than 7 g/dL',
+                requiresMedicalIntervention: 'Yes'
+            }));
+
+            // Then
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+            dateAreEqual(qrt.earliestDate, today());
+        });
+
+        it('Case - 6', function () {
+            // When
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 6,
+                ancRecommendedMedical: 'Yes',
+                highRiskCondition: 'HB is less than 7 g/dL',
+                requiresMedicalIntervention: 'Yes'
+            }));
+
+            // Then
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+            dateAreEqual(qrt.earliestDate, today());
+        });
+
+        it('Case - 7', function () {
+            // When
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 12,
+                ancRecommendedMedical: 'Yes',
+                highRiskCondition: null,
+                requiresMedicalIntervention: 'No'
+            }));
+            //Then
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+            dateAreEqual(qrt.earliestDate, today());
+        });
+
+        it('Case - 8', function () {
+            // When
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 5,
+                ancRecommendedMedical: 'Yes',
+                highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
+                requiresMedicalIntervention: 'No'
+            }));
+            // Then
+            dateAreEqual(anc.earliestDate, firstOfNextMonth());
+            dateAreEqual(qrt.earliestDate, today());
+        });
+
+        it('Case - 9', function () {
+            // When
+            scheduledDelivery({scheduledDate: afterMonths(7), encounterDate: today()});
+            const {anc, pwHome, qrt} = perform(ancVisit({
+                hb: 5,
+                ancRecommendedMedical: 'Yes',
+                highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
+                requiresMedicalIntervention: 'Yes'
+            }));
+            // Then
+            notScheduled(anc, pwHome, qrt);
+        });
     });
 
-    it('Case - 4', function () {
-
-        //When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 12,
-            ancRecommendedMedical: 'No',
-            highRiskCondition: 'Age at marriage is less than 19 years',
-            requiresMedicalIntervention: 'Yes'
-        }));
-
-        //Then
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(qrt.earliestDate, today());
+    describe("Growth Monitoring - Visit Scheduling", function () {
+        it('should pass', function () {
+            notScheduled(null);
+        });
     });
-
-    it('Case - 5', function () {
-
-        //When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 6,
-            ancRecommendedMedical: 'No',
-            highRiskCondition: 'HB is less than 7 g/dL',
-            requiresMedicalIntervention: 'Yes'
-        }));
-
-        // Then
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(qrt.earliestDate, today());
-    });
-
-    it('Case - 6', function () {
-        // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 6,
-            ancRecommendedMedical: 'Yes',
-            highRiskCondition: 'HB is less than 7 g/dL',
-            requiresMedicalIntervention: 'Yes'
-        }));
-
-        // Then
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(qrt.earliestDate, today());
-    });
-
-    it('Case - 7', function () {
-        // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 12,
-            ancRecommendedMedical: 'Yes',
-            highRiskCondition: null,
-            requiresMedicalIntervention: 'No'
-        }));
-        //Then
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(qrt.earliestDate, today());
-    });
-
-    it('Case - 8', function () {
-        // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 5,
-            ancRecommendedMedical: 'Yes',
-            highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
-            requiresMedicalIntervention: 'No'
-        }));
-        // Then
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(qrt.earliestDate, today());
-    });
-
-    it('Case - 9', function () {
-        // When
-        scheduledDelivery({scheduledDate: afterMonths(7), encounterDate: today()});
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 5,
-            ancRecommendedMedical: 'Yes',
-            highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
-            requiresMedicalIntervention: 'Yes'
-        }));
-        // Then
-        notScheduled(anc, pwHome, qrt);
-    })
 });
-
-
-
-
