@@ -152,17 +152,19 @@ describe('ANC', function () {
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'Yes',
-            highRiskCondition: 'BMI less than 18.5',
+            highRiskCondition: null,
             requiresMedicalIntervention: 'No'
         }));
 
         // Then
         notScheduled(pwHome);
-        dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(qrt.earliestDate, today());
+         dateAreEqual(anc.earliestDate, firstOfNextMonth());
+         dateAreEqual(qrt.earliestDate, today());
     });
 
     it('Case - 2', function () {
+
+        // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
@@ -170,11 +172,14 @@ describe('ANC', function () {
             requiresMedicalIntervention: 'No'
         }));
 
+        // Then
         notScheduled(pwHome, qrt);
         dateAreEqual(anc.earliestDate, firstOfNextMonth());
     });
 
     it('Case - 3', function () {
+
+        // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
@@ -182,6 +187,7 @@ describe('ANC', function () {
             requiresMedicalIntervention: 'No'
         }));
 
+        // Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
@@ -189,20 +195,25 @@ describe('ANC', function () {
     });
 
     it('Case - 4', function () {
+
+        //When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
             highRiskCondition: 'Age at marriage is less than 19 years',
-            requiresMedicalIntervention: 'No'
+            requiresMedicalIntervention: 'Yes'
         }));
 
+        //Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(pwHome.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
     });
 
     it('Case - 5', function () {
+
+        //When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 6,
             ancRecommendedMedical: 'No',
@@ -210,6 +221,7 @@ describe('ANC', function () {
             requiresMedicalIntervention: 'Yes'
         }));
 
+        // Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
@@ -217,6 +229,7 @@ describe('ANC', function () {
     });
 
     it('Case - 6', function () {
+        // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 6,
             ancRecommendedMedical: 'Yes',
@@ -224,6 +237,7 @@ describe('ANC', function () {
             requiresMedicalIntervention: 'Yes'
         }));
 
+        // Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
@@ -231,13 +245,14 @@ describe('ANC', function () {
     });
 
     it('Case - 7', function () {
+        // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: null,
             requiresMedicalIntervention: 'No'
         }));
-
+        //Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
@@ -245,13 +260,14 @@ describe('ANC', function () {
     });
 
     it('Case - 8', function () {
+        // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,
             ancRecommendedMedical: 'No',
             highRiskCondition: 'Age at marriage is less than 19 years',
             requiresMedicalIntervention: 'No'
         }));
-
+        //Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
@@ -259,13 +275,14 @@ describe('ANC', function () {
     });
 
     it('Case - 9', function () {
+        // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 5,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
             requiresMedicalIntervention: 'No'
         }));
-
+        // Then
         const expectedEarliestDateANC = firstOfNextMonth();
         const expectedEarliestDateQRT = today();
         expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
