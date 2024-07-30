@@ -62,7 +62,7 @@ export default function ({params, imports}) {
                 earliestDate: qrtDate,
                 maxDate: moment(qrtDate).add(30, 'days').toDate()
             });
-        } else if (!isEditScenario &&isHighRiskCondition && !requiresMedicalInterventionTreatment && !anmRecommendedMedicalFacilityIntervention) {
+        } else if (!isEditScenario && isHighRiskCondition && !requiresMedicalInterventionTreatment && !anmRecommendedMedicalFacilityIntervention) {
             nextDate = moment(programEncounter.earliestVisitDateTime).add(1, 'M').startOf('month').toDate();
             scheduleBuilder.add({
                 name: "PW Home Visit",

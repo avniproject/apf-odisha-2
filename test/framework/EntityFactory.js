@@ -123,6 +123,7 @@ class EntityFactory {
     }
 
     static createProgramEncounter({
+                                      uuid,
                                       programEnrolment,
                                       encounterDateTime,
                                       observations = [],
@@ -137,6 +138,7 @@ class EntityFactory {
         programEncounter.encounterDateTime = encounterDateTime;
         programEncounter.earliestVisitDateTime = earliestDateTime;
         programEncounter.maxVisitDateTime = maxVisitDateTime;
+        programEncounter.uuid = uuid;
 
         programEnrolment.addEncounter(programEncounter);
 

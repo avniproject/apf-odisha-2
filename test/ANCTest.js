@@ -4,6 +4,7 @@ import EntityFactory from "./framework/EntityFactory";
 import {RuleCondition, VisitScheduleBuilder} from "rules-config/rules";
 import _ from "lodash";
 import {afterMonths, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
+import {ModelGeneral} from "openchs-models";
 
 describe('ANC', function () {
     let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept,
@@ -106,6 +107,7 @@ describe('ANC', function () {
             requiresMedicalIntervention
         });
         return EntityFactory.createProgramEncounter({
+            uuid: ModelGeneral.randomUUID(),
             encounterType: anc,
             programEnrolment: enrolment,
             observations: observations,
@@ -202,18 +204,20 @@ describe('ANC', function () {
     });
 
     it('Case - 3', function () {
+        // Given
+        const anc1 = ancVisit({
+            hb: 11,
+            ancRecommendedMedical: 'No',
+            highRiskCondition: 'BMI less than 18.5',
+            requiresMedicalIntervention: 'No'
+        });
 
         // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 12,
-            ancRecommendedMedical: 'No',
-            highRiskCondition: 'Age at marriage is less than 19 years',
-            requiresMedicalIntervention: 'No'
-        }));
+        const {anc, pwHome, qrt} = editAnc(anc1, {});
 
         // Then
+        notScheduled(qrt, pwHome);
         dateAreEqual(anc.earliestDate, firstOfNextMonth());
-        dateAreEqual(pwHome.earliestDate, firstOfNextMonth());
     });
 
     it('Case - 4', function () {
