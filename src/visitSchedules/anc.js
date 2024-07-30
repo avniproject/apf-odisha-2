@@ -53,9 +53,7 @@ export default function ({params, imports}) {
         const qrtEligibility = isSevereAnemic || requiresMedicalInterventionTreatment || anmRecommendedMedicalFacilityIntervention;
         const ancEncounter = lastfilledEncounter('ANC');
         const isEditScenario = ancEncounter ? ancEncounter.uuid === programEncounter.uuid : false;
-        const isHighRiskCondition = programEncounter.getObservationReadableValue('High risk condition');
-
-        // console.log('anmRecommendedMedicalFacilityIntervention',anmRecommendedMedicalFacilityIntervention);
+        const isHighRiskCondition = programEncounter.getObservationReadableValue('High risk condition') != undefined;
 
         if (noQrtEncountersScheduled && qrtEligibility) {
             scheduleBuilder.add({
@@ -64,7 +62,8 @@ export default function ({params, imports}) {
                 earliestDate: qrtDate,
                 maxDate: moment(qrtDate).add(30, 'days').toDate()
             });
-        } else if (!isEditScenario && isHighRiskCondition && !requiresMedicalInterventionTreatment && !anmRecommendedMedicalFacilityIntervention) {
+        } else if ( isHighRiskCondition && !requiresMedicalInterventionTreatment && !anmRecommendedMedicalFacilityIntervention) {
+            // !isEditScenario &&
             nextDate = moment(programEncounter.earliestVisitDateTime).add(1, 'M').startOf('month').toDate();
             scheduleBuilder.add({
                 name: "PW Home Visit",

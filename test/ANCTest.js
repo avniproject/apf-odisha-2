@@ -6,7 +6,8 @@ import _ from "lodash";
 import {afterMonths, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
 
 describe('ANC', function () {
-    let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept, requiresMedicalInterventionTreatmentConcept, highRiskConditionConcept,
+    let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept,
+        requiresMedicalInterventionTreatmentConcept, highRiskConditionConcept,
         enrolment;
 
     beforeEach(() => {
@@ -75,7 +76,7 @@ describe('ANC', function () {
             individual,
             program: EntityFactory.createProgram({name: "Pregnancy"})
         });
-        scheduledDelivery({scheduledDate: afterMonths(7)});
+
     });
 
     function createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention}) {
@@ -91,8 +92,19 @@ describe('ANC', function () {
         return observations;
     }
 
-    function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, encounterDate = new Date()}) {
-        const observations = createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention});
+    function ancVisit({
+                          hb,
+                          ancRecommendedMedical,
+                          highRiskCondition,
+                          requiresMedicalIntervention,
+                          encounterDate = new Date()
+                      }) {
+        const observations = createAncObservations({
+            hb,
+            ancRecommendedMedical,
+            highRiskCondition,
+            requiresMedicalIntervention
+        });
         return EntityFactory.createProgramEncounter({
             encounterType: anc,
             programEnrolment: enrolment,
@@ -111,11 +123,11 @@ describe('ANC', function () {
         });
     }
 
-    function scheduledDelivery({scheduledDate}) {
+    function scheduledDelivery({scheduledDate, encounterDate}) {
         return EntityFactory.createProgramEncounter({
             encounterType: delivery,
             programEnrolment: enrolment,
-            encounterDateTime: null,
+            encounterDateTime: encounterDate,
             earliestDateTime: scheduledDate,
             observations: []
         });
@@ -140,8 +152,17 @@ describe('ANC', function () {
     }
 
     function editAnc(visit, {hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention}) {
-        const observations = createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention});
-        EntityFactory.editProgramEncounter({programEncounter: visit, observations: observations, encounterDateTime: visit.encounterDateTime});
+        const observations = createAncObservations({
+            hb,
+            ancRecommendedMedical,
+            highRiskCondition,
+            requiresMedicalIntervention
+        });
+        EntityFactory.editProgramEncounter({
+            programEncounter: visit,
+            observations: observations,
+            encounterDateTime: visit.encounterDateTime
+        });
         return perform(visit);
     }
 
@@ -160,7 +181,7 @@ describe('ANC', function () {
         });
 
         // When
-        const {anc, pwHome, qrt} = editAnc(anc1,{hb: 12});
+        const {anc, pwHome, qrt} = editAnc(anc1, {hb: 12});
 
         // Then
         notScheduled(pwHome, anc);
@@ -191,10 +212,8 @@ describe('ANC', function () {
         }));
 
         // Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(pwHome.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(pwHome.earliestDate, firstOfNextMonth());
     });
 
     it('Case - 4', function () {
@@ -208,10 +227,8 @@ describe('ANC', function () {
         }));
 
         //Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
     });
 
     it('Case - 5', function () {
@@ -225,10 +242,8 @@ describe('ANC', function () {
         }));
 
         // Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
     });
 
     it('Case - 6', function () {
@@ -241,10 +256,8 @@ describe('ANC', function () {
         }));
 
         // Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
     });
 
     it('Case - 7', function () {
@@ -256,28 +269,11 @@ describe('ANC', function () {
             requiresMedicalIntervention: 'No'
         }));
         //Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
     });
 
     it('Case - 8', function () {
-        // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 12,
-            ancRecommendedMedical: 'No',
-            highRiskCondition: 'Age at marriage is less than 19 years',
-            requiresMedicalIntervention: 'No'
-        }));
-        //Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(pwHome.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-    });
-
-    it('Case - 9', function () {
         // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 5,
@@ -286,11 +282,22 @@ describe('ANC', function () {
             requiresMedicalIntervention: 'No'
         }));
         // Then
-        const expectedEarliestDateANC = firstOfNextMonth();
-        const expectedEarliestDateQRT = today();
-        expect(new Date(anc.earliestDate).toDateString()).toBe(expectedEarliestDateANC.toDateString());
-        expect(new Date(qrt.earliestDate).toDateString()).toBe(expectedEarliestDateQRT.toDateString());
+        dateAreEqual(anc.earliestDate, firstOfNextMonth());
+        dateAreEqual(qrt.earliestDate, today());
     });
+
+    it('Case - 9', function () {
+        // When
+        scheduledDelivery({scheduledDate: afterMonths(7), encounterDate: today()});
+        const {anc, pwHome, qrt} = perform(ancVisit({
+            hb: 5,
+            ancRecommendedMedical: 'Yes',
+            highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
+            requiresMedicalIntervention: 'Yes'
+        }));
+        // Then
+        notScheduled(anc, pwHome, qrt);
+    })
 });
 
 
