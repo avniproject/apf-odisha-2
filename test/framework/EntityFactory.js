@@ -143,6 +143,20 @@ class EntityFactory {
         return programEncounter;
     }
 
+    static editProgramEncounter({
+                                    programEncounter,
+                                    encounterDateTime,
+                                    observations = []
+                                }) {
+        const existingObservations = programEncounter.observations;
+        observations.forEach(observation => {
+            const existingObservation = existingObservations.find(existingObservation => existingObservation.concept.name === observation.concept.name);
+            existingObservation.valueJSON = observation.valueJSON;
+        });
+        programEncounter.encounterDateTime = encounterDateTime;
+        return programEncounter;
+    }
+
     static createEncounterType({uuid = General.randomUUID(), name}) {
         const encounterType = new EncounterType();
         encounterType.uuid = uuid;

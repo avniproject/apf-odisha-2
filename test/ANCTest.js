@@ -78,7 +78,7 @@ describe('ANC', function () {
         scheduledDelivery({scheduledDate: afterMonths(7)});
     });
 
-    function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, earliestVisit = new Date()}) {
+    function createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention}) {
         const observations = [];
         if (!_.isNil(hb))
             observations.push(EntityFactory.createObservation(hbConcept, hb));
@@ -88,7 +88,11 @@ describe('ANC', function () {
             observations.push(EntityFactory.createCodedObservation(requiresMedicalInterventionTreatmentConcept, requiresMedicalIntervention));
         if (!_.isNil(highRiskCondition))
             observations.push(EntityFactory.createCodedObservation(highRiskConditionConcept, highRiskCondition));
+        return observations;
+    }
 
+    function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, earliestVisit = new Date()}) {
+        const observations = createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention});
         return EntityFactory.createProgramEncounter({
             encounterType: anc,
             programEnrolment: enrolment,
@@ -134,6 +138,12 @@ describe('ANC', function () {
         };
     }
 
+    function editAnc(visit, {hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention}) {
+        const observations = createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention});
+        EntityFactory.editProgramEncounter({programEncounter: visit, observations: observations, encounterDateTime: visit.encounterDateTime});
+        return perform(visit);
+    }
+
     function notScheduled(...visits) {
         visits.forEach(visit => expect(_.isNil(visit)).toBeTruthy());
     }
@@ -141,7 +151,7 @@ describe('ANC', function () {
     it('Case - 1', function () {
         // Given
         scheduledANC({scheduledDate: firstOfNextMonth()});
-        ancVisit({
+        const anc1 = ancVisit({
             hb: 11,
             ancRecommendedMedical: 'Yes',
             highRiskCondition: 'BMI less than 18.5',
@@ -149,17 +159,10 @@ describe('ANC', function () {
         });
 
         // When
-        const {anc, pwHome, qrt} = perform(ancVisit({
-            hb: 12,
-            ancRecommendedMedical: 'Yes',
-            highRiskCondition: null,
-            requiresMedicalIntervention: 'No'
-        }));
+        const {anc, pwHome, qrt} = editAnc(anc1,{hb: 12});
 
         // Then
-        notScheduled(pwHome);
-         dateAreEqual(anc.earliestDate, firstOfNextMonth());
-         dateAreEqual(qrt.earliestDate, today());
+        notScheduled(pwHome, anc, qrt);
     });
 
     it('Case - 2', function () {
