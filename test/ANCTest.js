@@ -91,12 +91,13 @@ describe('ANC', function () {
         return observations;
     }
 
-    function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, earliestVisit = new Date()}) {
+    function ancVisit({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention, encounterDate = new Date()}) {
         const observations = createAncObservations({hb, ancRecommendedMedical, highRiskCondition, requiresMedicalIntervention});
         return EntityFactory.createProgramEncounter({
             encounterType: anc,
             programEnrolment: enrolment,
-            observations: observations
+            observations: observations,
+            encounterDateTime: encounterDate
         });
     }
 
@@ -162,11 +163,10 @@ describe('ANC', function () {
         const {anc, pwHome, qrt} = editAnc(anc1,{hb: 12});
 
         // Then
-        notScheduled(pwHome, anc, qrt);
+        notScheduled(pwHome, anc);
     });
 
     it('Case - 2', function () {
-
         // When
         const {anc, pwHome, qrt} = perform(ancVisit({
             hb: 12,

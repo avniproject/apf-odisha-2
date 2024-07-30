@@ -126,8 +126,8 @@ class EntityFactory {
                                       programEnrolment,
                                       encounterDateTime,
                                       observations = [],
-                                      encounterType, earliestDateTime = new Date(),
-                                      earliestVisitDateTime,
+                                      encounterType,
+                                      earliestDateTime = new Date(),
                                       maxVisitDateTime
                                   }) {
         const programEncounter = ProgramEncounter.createEmptyInstance();
@@ -135,7 +135,7 @@ class EntityFactory {
         programEncounter.encounterType = encounterType;
         programEncounter.programEnrolment = programEnrolment;
         programEncounter.encounterDateTime = encounterDateTime;
-        programEncounter.earliestVisitDateTime = earliestVisitDateTime;
+        programEncounter.earliestVisitDateTime = earliestDateTime;
         programEncounter.maxVisitDateTime = maxVisitDateTime;
 
         programEnrolment.addEncounter(programEncounter);
