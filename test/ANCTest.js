@@ -163,6 +163,10 @@ describe('Visit Scheduling', function () {
         visits.forEach(visit => expect(_.isNil(visit)).toBeTruthy());
     }
 
+    function isScheduled(...visits) {
+        visits.forEach(visit => expect(!_.isNil(visit)).toBeTruthy());
+    }
+
     describe('ANC - Visit Scheduling', function () {
         beforeEach(() => {
             enrolment = EntityFactory.createEnrolment({
@@ -175,16 +179,16 @@ describe('Visit Scheduling', function () {
 
         it('Case - 1', function () {
             // Given
-            scheduledANC({scheduledDate: firstOfNextMonth()});
             const anc1 = ancVisit({
                 hb: 11,
                 ancRecommendedMedical: 'Yes',
                 highRiskCondition: 'BMI less than 18.5',
                 requiresMedicalIntervention: 'No'
             });
+            scheduledANC({scheduledDate: firstOfNextMonth()});
 
             // When
-            const {anc, pwHome, qrt} = editAnc(anc1, {hb: 12});
+            let {anc, pwHome} = editAnc(anc1, {hb: 12});
 
             // Then
             notScheduled(pwHome, anc);
