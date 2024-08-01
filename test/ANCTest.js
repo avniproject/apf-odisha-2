@@ -4,7 +4,7 @@ import GrowthMonitoring from '../src/visitSchedules/growthMonitoring';
 import EntityFactory from "./framework/EntityFactory";
 import {RuleCondition, VisitScheduleBuilder} from "rules-config/rules";
 import _ from "lodash";
-import {afterMonths, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
+import {afterMonths, age, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
 import {ModelGeneral} from "openchs-models";
 import moment from "moment";
 import {notScheduled} from "./framework/VisitScheduleUtil";
@@ -254,6 +254,14 @@ describe('Visit Scheduling', function () {
             });
         });
 
+        function enrolledChild(age) {
+            individual = EntityFactory.createIndividual({name: "Test Child", age: age});
+            enrolment = EntityFactory.createEnrolment({
+                observations: [], programExitDateTime: null,//moment(),
+                individual, program: EntityFactory.createProgram({name: "Child"})
+            });
+        }
+
         function createGrowthMonitoringObservations({
                                                         treatmentAdvice, nutritionalStatus, growthFaltering
                                                     }) {
@@ -322,6 +330,9 @@ describe('Visit Scheduling', function () {
         }
 
         it('Case - 1', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',//Any option selected
@@ -335,6 +346,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 2', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',//Any option selected
@@ -348,6 +362,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 3', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',//Any option selected
@@ -361,6 +378,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 4', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
@@ -374,6 +394,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 5', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',
@@ -387,6 +410,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 6', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',
@@ -400,6 +426,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 7', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
@@ -413,6 +442,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 8', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
@@ -426,6 +458,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 9', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',
@@ -439,6 +474,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 10', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
@@ -452,6 +490,9 @@ describe('Visit Scheduling', function () {
         });
 
         it('Case - 11', function () {
+            // Given
+            enrolledChild(age({years: 1}));
+
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: null,
