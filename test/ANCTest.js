@@ -235,6 +235,7 @@ describe('Visit Scheduling', function () {
                 highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'Yes'
             }));
+
             // Then
             notScheduled(anc, pwHome, qrt);
         });
