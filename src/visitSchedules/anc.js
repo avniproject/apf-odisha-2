@@ -53,7 +53,7 @@ export default function ({params, imports}) {
         const qrtEligibility = isSevereAnemic || requiresMedicalInterventionTreatment || anmRecommendedMedicalFacilityIntervention;
         const ancEncounter = lastfilledEncounter('ANC');
         const isEditScenario = ancEncounter ? ancEncounter.uuid === programEncounter.uuid : false;
-        const isHighRiskCondition = programEncounter.getObservationReadableValue('High risk condition') != undefined;
+        const isHighRiskCondition = programEncounter.getObservationReadableValue('High risk condition');
 
         if (noQrtEncountersScheduled && qrtEligibility) {
             scheduleBuilder.add({
