@@ -9,13 +9,13 @@ export default function
 
     const earliestDate = moment(programEncounter.earliestVisitDateTime).add(1, 'month').startOf('month').toDate();
 
-    let isEditScenario = programEncounter.programEnrolment.encounters.some((enc) =>
+    let isNextVisitAlreadyScheduled = programEncounter.programEnrolment.encounters.some((enc) =>
         enc.encounterType.name === 'Growth Monitoring' &&
         enc.voided === false &&
         moment(enc.earliestVisitDateTime).isSame(earliestDate, 'day')
     );
 
-    if(programEncounter.programEnrolment.individual.getAgeInYears() < 5 && !isEditScenario) {
+    if(programEncounter.programEnrolment.individual.getAgeInYears() < 5 && !isNextVisitAlreadyScheduled) {
         scheduleBuilder.add({
             name: 'Growth Monitoring',
             encounterType: 'Growth Monitoring',
@@ -31,14 +31,14 @@ export default function
 
     console.log('isSAM',programEncounter.getObservationReadableValue("Nutritional Status"));
 
-    if((isTreatmentNotAtHome && !isEditScenario) || (isSAM && !isEditScenario) ){
+    if((isTreatmentNotAtHome && !isNextVisitAlreadyScheduled) || (isSAM && !isNextVisitAlreadyScheduled) ){
         scheduleBuilder.add({
             name: 'QRT Child',
             encounterType: 'QRT Child',
             earliestDate: moment(programEncounter.encounterDateTime).toDate(),
             maxDate: moment(programEncounter.encounterDateTime).add(30, 'days').toDate()
         });
-    }else if ((isTreatmentAtHome || isGF1 ) && !isEditScenario && !isSAM){
+    }else if ((isTreatmentAtHome || isGF1 ) && !isNextVisitAlreadyScheduled && !isSAM){
         scheduleBuilder.add({
             name: 'Child Home Visit',
             encounterType: 'Child Home Visit',

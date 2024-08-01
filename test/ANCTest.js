@@ -331,7 +331,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 1', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -347,7 +347,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 2', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 5.1}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -357,13 +357,12 @@ describe('Visit Scheduling', function () {
                 encounterDate: today()
             }));
             // Then
-            dateAreEqual(growthMonitoring.earliestDate, firstOfNextMonth());
-            dateAreEqual(qrtChild.earliestDate, today());
+            notScheduled(growthMonitoring, qrtChild, childHomeVisit);
         });
 
         it('Case - 3', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -379,7 +378,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 4', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -395,7 +394,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 5', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -411,7 +410,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 6', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -427,7 +426,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 7', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -443,7 +442,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 8', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -459,7 +458,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 9', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -475,7 +474,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 10', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
@@ -491,7 +490,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 11', function () {
             // Given
-            enrolledChild(age({years: 1}));
+            enrolledChild(age({years: 2}));
 
             // When
             const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
