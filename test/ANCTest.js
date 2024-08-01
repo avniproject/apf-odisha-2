@@ -102,6 +102,10 @@ describe('Visit Scheduling', function () {
         return perform(visit);
     }
 
+    function anyHighRiskCondition() {
+        return 'BMI less than 18.5';
+    }
+
     describe('ANC - Visit Scheduling', function () {
         beforeEach(() => {
             enrolment = EntityFactory.createEnrolment({
@@ -115,7 +119,7 @@ describe('Visit Scheduling', function () {
             const anc1 = ancVisit({
                 hb: 11,
                 ancRecommendedMedical: 'Yes',
-                highRiskCondition: 'BMI less than 18.5',
+                highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'No'
             });
             scheduledANC({scheduledDate: firstOfNextMonth()});
@@ -143,7 +147,7 @@ describe('Visit Scheduling', function () {
             const anc1 = ancVisit({
                 hb: 11,
                 ancRecommendedMedical: 'No',
-                highRiskCondition: 'BMI less than 18.5',
+                highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'No'
             });
 
@@ -176,7 +180,7 @@ describe('Visit Scheduling', function () {
             const {anc, pwHome, qrt} = perform(ancVisit({
                 hb: 6,
                 ancRecommendedMedical: 'No',
-                highRiskCondition: 'HB is less than 7 g/dL',
+                highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'Yes'
             }));
 
@@ -190,7 +194,7 @@ describe('Visit Scheduling', function () {
             const {anc, pwHome, qrt} = perform(ancVisit({
                 hb: 6,
                 ancRecommendedMedical: 'Yes',
-                highRiskCondition: 'HB is less than 7 g/dL',
+                highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'Yes'
             }));
 
@@ -214,7 +218,7 @@ describe('Visit Scheduling', function () {
             const {anc, pwHome, qrt} = perform(ancVisit({
                 hb: 5,
                 ancRecommendedMedical: 'Yes',
-                highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
+                highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'No'
             }));
             // Then
@@ -228,7 +232,7 @@ describe('Visit Scheduling', function () {
             const {anc, pwHome, qrt} = perform(ancVisit({
                 hb: 5,
                 ancRecommendedMedical: 'Yes',
-                highRiskCondition: 'HB is less than 7 g/dL' || 'Age at marriage is less than 19 years',
+                highRiskCondition: anyHighRiskCondition(),
                 requiresMedicalIntervention: 'Yes'
             }));
             // Then
