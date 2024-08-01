@@ -7,6 +7,7 @@ import _ from "lodash";
 import {afterMonths, dateAreEqual, firstOfNextMonth, today} from "./framework/DateUtil";
 import {ModelGeneral} from "openchs-models";
 import moment from "moment";
+import {notScheduled} from "./framework/VisitScheduleUtil";
 
 describe('Visit Scheduling', function () {
     let individual, anc, delivery, hbConcept, anmRecommendedMedicalFacilityInterventionConcept,
@@ -99,14 +100,6 @@ describe('Visit Scheduling', function () {
             programEncounter: visit, observations: observations, encounterDateTime: visit.encounterDateTime
         });
         return perform(visit);
-    }
-
-    function notScheduled(...visits) {
-        visits.forEach(visit => expect(_.isNil(visit)).toBeTruthy());
-    }
-
-    function isScheduled(...visits) {
-        visits.forEach(visit => expect(!_.isNil(visit)).toBeTruthy());
     }
 
     describe('ANC - Visit Scheduling', function () {
@@ -244,24 +237,22 @@ describe('Visit Scheduling', function () {
     });
 
     describe("Growth Monitoring - Visit Scheduling", function () {
-
         let individual, growthMonitoring, treatmentAdviceConcept, nutritionalStatusConcept, growthFalteringConcept,
             enrolment;
 
-        individual = EntityFactory.createIndividual({name: "Test Child"});
+        beforeEach(() => {
+            growthMonitoring = EntityFactory.createEncounterType({name: "Growth Monitoring"});
 
-        enrolment = EntityFactory.createEnrolment({
-            observations: [], programExitDateTime: null,//moment(),
-            individual, program: EntityFactory.createProgram({name: "Child"})
+            treatmentAdviceConcept = EntityFactory.createCodedConceptWithAnswers("What is the treatment advise for the SAM/MAM/GF2 child?", ['Treatment at home', 'Referred to CHC', 'Any other higher facility/DH/MC']);
+            nutritionalStatusConcept = EntityFactory.createConcept({name: "Nutritional Status", dataType: 'Text', uuid: '053b4f97-eacf-4f20-9d68-d6850966ce93'});
+            growthFalteringConcept = EntityFactory.createConcept({name: "Growth Faltering", dataType: 'Text', uuid: 'a9d8db9a-8411-412c-82ed-e6e177353561'});
+
+            individual = EntityFactory.createIndividual({name: "Test Child"});
+            enrolment = EntityFactory.createEnrolment({
+                observations: [], programExitDateTime: null,//moment(),
+                individual, program: EntityFactory.createProgram({name: "Child"})
+            });
         });
-
-        growthMonitoring = EntityFactory.createEncounterType({name: "Growth Monitoring"});
-
-        treatmentAdviceConcept = EntityFactory.createCodedConceptWithAnswers("What is the treatment advise for the SAM/MAM/GF2 child?", ['Treatment at home', 'Referred to CHC', 'Any other higher facility/DH/MC']);
-
-        nutritionalStatusConcept = EntityFactory.createConcept({name: "Nutritional Status",dataType: 'Text',uuid: '053b4f97-eacf-4f20-9d68-d6850966ce93'});
-
-        growthFalteringConcept = EntityFactory.createConcept({name: "Growth Faltering",dataType: 'Text',uuid: 'a9d8db9a-8411-412c-82ed-e6e177353561'});
 
         function createGrowthMonitoringObservations({
                                                         treatmentAdvice, nutritionalStatus, growthFaltering
@@ -330,10 +321,9 @@ describe('Visit Scheduling', function () {
             };
         }
 
-
         it('Case - 1', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',//Any option selected
                 nutritionalStatus: 'SAM',
                 growthFaltering: 'GF1',
@@ -341,12 +331,12 @@ describe('Visit Scheduling', function () {
             }));
             // Then
             dateAreEqual(growthMonitoring.earliestDate, firstOfNextMonth());
-            dateAreEqual(qrtChild.earliestDate,today());
+            dateAreEqual(qrtChild.earliestDate, today());
         });
 
         it('Case - 2', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',//Any option selected
                 nutritionalStatus: 'SAM',
                 growthFaltering: 'GF2',
@@ -354,12 +344,12 @@ describe('Visit Scheduling', function () {
             }));
             // Then
             dateAreEqual(growthMonitoring.earliestDate, firstOfNextMonth());
-            dateAreEqual(qrtChild.earliestDate,today());
+            dateAreEqual(qrtChild.earliestDate, today());
         });
 
         it('Case - 3', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',//Any option selected
                 nutritionalStatus: 'SAM',
                 growthFaltering: 'None',
@@ -367,12 +357,12 @@ describe('Visit Scheduling', function () {
             }));
             // Then
             dateAreEqual(growthMonitoring.earliestDate, firstOfNextMonth());
-            dateAreEqual(qrtChild.earliestDate,today());
+            dateAreEqual(qrtChild.earliestDate, today());
         });
 
         it('Case - 4', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
                 nutritionalStatus: 'MAM',
                 growthFaltering: 'GF2',
@@ -380,12 +370,12 @@ describe('Visit Scheduling', function () {
             }));
             // Then
             dateAreEqual(growthMonitoring.earliestDate, firstOfNextMonth());
-            dateAreEqual(qrtChild.earliestDate,today());
+            dateAreEqual(qrtChild.earliestDate, today());
         });
 
         it('Case - 5', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',
                 nutritionalStatus: 'MAM',
                 growthFaltering: 'GF2',
@@ -398,7 +388,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 6', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',
                 nutritionalStatus: 'MAM',
                 growthFaltering: 'GF1',
@@ -411,7 +401,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 7', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
                 nutritionalStatus: 'MAM',
                 growthFaltering: 'None',
@@ -424,7 +414,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 8', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
                 nutritionalStatus: 'Normal',
                 growthFaltering: 'GF1',
@@ -437,7 +427,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 9', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Treatment at home',
                 nutritionalStatus: 'Normal',
                 growthFaltering: 'GF1',
@@ -450,7 +440,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 10', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: 'Referred to CHC', //Any other Higher facility/DH/MC
                 nutritionalStatus: 'Normal',
                 growthFaltering: 'GF2',
@@ -463,7 +453,7 @@ describe('Visit Scheduling', function () {
 
         it('Case - 11', function () {
             // When
-            const {growthMonitoring,qrtChild,childHomeVisit} = performGM(growthMonitoringVisit({
+            const {growthMonitoring, qrtChild, childHomeVisit} = performGM(growthMonitoringVisit({
                 treatmentAdvice: null,
                 nutritionalStatus: 'Normal',
                 growthFaltering: 'None',

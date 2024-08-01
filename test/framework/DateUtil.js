@@ -12,6 +12,10 @@ export function today() {
     return moment().toDate();
 }
 
+export function age({years = 0, months = 0, days = 0}) {
+    return {years, months, days};
+}
+
 export function dateAreEqual(a, b) {
     expect(a.getDate()).toBe(b.getDate());
     expect(a.getMonth()).toBe(b.getMonth());

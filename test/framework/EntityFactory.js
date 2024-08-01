@@ -25,12 +25,15 @@ function addCodedAnswers(concept, answerConceptNames) {
 class EntityFactory {
     static concepts = new Map();
 
-    static createIndividual(name) {
+    static createIndividual({name, age}) {
         let individual = new Individual();
         individual.uuid = General.randomUUID();
         individual.name = name;
         individual.enrolments = [];
         individual.encounters = [];
+        if (!_.isNil(age)) {
+            individual.dateOfBirth = moment().subtract(age.years, 'years').subtract(age.months, 'months').subtract(age.days, 'days');
+        }
         return individual;
     }
 
@@ -39,13 +42,6 @@ class EntityFactory {
         formElementGroup.formElements = [];
         formElementGroup.form = form;
         form.addFormElementGroup(formElementGroup);
-        return formElementGroup;
-    }
-
-    static createFormElementGroup(name, displayOrder, form) {
-        const formElementGroup = EntityFactory.createFormElementGroup(form);
-        formElementGroup.name = name;
-        formElementGroup.displayOrder = displayOrder;
         return formElementGroup;
     }
 
