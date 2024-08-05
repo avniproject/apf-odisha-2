@@ -29,8 +29,6 @@ export default function
     const isSAM = programEncounter.getObservationReadableValue("Nutritional Status") == "SAM";
     const isGF1 = programEncounter.getObservationReadableValue("Growth Faltering") == "GF1";
 
-    console.log('isSAM',programEncounter.getObservationReadableValue("Nutritional Status"));
-
     if((isTreatmentNotAtHome && !isNextVisitAlreadyScheduled) || (isSAM && !isNextVisitAlreadyScheduled) ){
         scheduleBuilder.add({
             name: 'QRT Child',
