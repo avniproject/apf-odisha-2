@@ -134,7 +134,7 @@ WITH cte_nrc_status AS (SELECT DISTINCT ind.id  AS "Individual ID",
                                  LEFT JOIN apfodisha.individual_child_qrt_child qrt
                                            ON ind.id = follow_up.individual_id
                                                AND qrt.encounter_date_time IS NOT NULL
-                                 LEFT JOIN apfodisha.individual_child_nrc nrc
+                                 LEFT JOIN apfodisha.individual_child_nrc_admission nrc
                                            ON nrc.individual_id = qrt.individual_id
                                                AND qrt.encounter_date_time IS NOT null
                                                and qrt.last_modified_date_time > :date)
@@ -304,7 +304,7 @@ SET "Severely Underweight"                                          = fld."Sever
     "MAM"                                                           = fld."MAM",
     "Moderately Stunted"                                            = fld."Moderately Stunted",
     "Severely Stunted"                                              = fld."Severely Stunted",
-    "Growth Faltering"                                              = fld."Growth Faltering",
+    "Growth Falter Status (GF-1/GF-2)"                              = fld."Growth Faltering",
     "Height"                                                        = fld."Height",
     "Weight"                                                        = fld."Weight",
     "Is the child going to PPK?"                                    = fld."Is the child going to PPK?",
@@ -315,7 +315,7 @@ SET "Severely Underweight"                                          = fld."Sever
     "Is the child receiving THR from AWC"                           = fld."Is the child receiving THR from AWC",
     "Did the child attended VHND last month"                        = fld."Did the child attended VHND last month",
     "What is the treatment advise for the SAM/MAM/GF2 child?"       = fld."What is the treatment advise for the SAM/MAM/GF2 child?",
-    "Is the child enrolled in the CMAM program"                     = fld."Is the child enrolled in the CMAM program",
+    "Is the child enrolled in the CMAM program?"                    = fld."Is the child enrolled in the CMAM program?",
     "Is the child availing benefits (ATHR) under the CMAM program?" = fld."Is the child availing benefits (ATHR) under the CMAM program?",
     "Did you receive additional THR (MSPY)?"                        = fld."Did you receive additional THR (MSPY)?"
 
