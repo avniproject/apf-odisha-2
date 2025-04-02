@@ -1,8 +1,9 @@
 {
   "ddl": [
     {
+      "order": 1,
       "table": "individual_child_growth_monitoring_report",
-      "sql": "table-create.sql"
+      "sql": "icgmr-table-create.sql"
     }
   ],
   "dml": [
@@ -13,7 +14,7 @@
         {
           "order": 1,
           "sourceTableName": "individual",
-          "insert-sql": "individual-insert.sql",
+          "insert-sql": "icgmr-individual-insert.sql",
           "update-sqls": []
         },
         {
@@ -21,10 +22,10 @@
           "sourceTableName": "individual_child_growth_monitoring",
           "insert-sql": "",
           "update-sqls": [
-            "sam-mam-update.sql",
-            "nrc-status-update.sql",
-            "relapse-update.sql",
-            "growth-monitoring-fields-update.sql"
+            "icgmr-sam-mam-update.sql",
+            "icgmr-nrc-status-update.sql",
+            "icgmr-relapse-update.sql",
+            "icgmr-growth-monitoring-fields-update.sql"
           ]
         },
         {
@@ -32,7 +33,7 @@
           "sourceTableName": "address_level",
           "insert-sql": "",
           "update-sqls": [
-            "village-fields-update.sql"
+            "icgmr-village-fields-update.sql"
           ]
         },
         {
@@ -40,7 +41,7 @@
           "sourceTableName": "individual_child_awc_mapping",
           "insert-sql": "",
           "update-sqls": [
-            "awc-fields-update.sql"
+            "icgmr-awc-fields-update.sql"
           ]
         },
         {
@@ -48,7 +49,7 @@
           "sourceTableName": "individual",
           "insert-sql": "",
           "update-sqls": [
-            "individual-fields-update.sql"
+            "icgmr-individual-fields-update.sql"
           ]
         }
       ]
