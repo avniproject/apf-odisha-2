@@ -1,8 +1,6 @@
 set role apfodisha;
 
-
 ------------------Create table script-----------------------------------------
-
 
 CREATE TABLE apfodisha.individual_child_growth_monitoring_report
 (
@@ -69,7 +67,8 @@ FROM apfodisha.individual ind
                  follow_up.program_enrolment_id = enrl.id
              AND follow_up.encounter_date_time IS NOT NULL
              AND follow_up.is_voided = false
-WHERE ind.created_date_time <= :input_date;
+WHERE (ind.created_date_time > :previousCutoffDateTime AND ind.created_date_time <= :newCutoffDateTime)
+   OR (ind.last_modified_date_time > :previousCutoffDateTime AND ind.last_modified_date_time <= :newCutoffDateTime);
 
 
 ---------------------------Last SAM and MAM Script--------------------------------
@@ -80,7 +79,8 @@ WITH last_sam_mam AS (SELECT ind.id  AS "Individual ID",
                                      ORDER BY follow_up.encounter_date_time DESC NULLS LAST
                                      ) = 1
                                      AND follow_up."Weight for Height Status" = 'SAM'
-                                     and follow_up.last_modified_date_time >= :date
+                                     AND follow_up.last_modified_date_time > :previousCutoffDateTime 
+                                     AND follow_up.last_modified_date_time <= :newCutoffDateTime
                                      THEN follow_up.encounter_date_time
                                  ELSE NULL
                                  END AS "Date of Last SAM",
@@ -90,7 +90,8 @@ WITH last_sam_mam AS (SELECT ind.id  AS "Individual ID",
                                      ORDER BY follow_up.encounter_date_time DESC NULLS LAST
                                      ) = 1
                                      AND follow_up."Weight for Height Status" = 'MAM'
-                                     and follow_up.last_modified_date_time >= :date
+                                     AND follow_up.last_modified_date_time > :previousCutoffDateTime 
+                                     AND follow_up.last_modified_date_time <= :newCutoffDateTime
                                      THEN follow_up.encounter_date_time
                                  ELSE NULL
                                  END AS "Date of Last MAM"
@@ -103,8 +104,7 @@ WITH last_sam_mam AS (SELECT ind.id  AS "Individual ID",
                            apfodisha.individual_child_growth_monitoring follow_up ON
                                        follow_up.program_enrolment_id = enrl.id
                                    AND follow_up.encounter_date_time IS NOT NULL
-                                   AND follow_up.is_voided = false
-                                   and follow_up.last_modified_date_time > :date)
+                                   AND follow_up.is_voided = false)
 UPDATE
     apfodisha.individual_child_growth_monitoring_report growth_report
 SET "Date of Last SAM" = lsm."Date of Last SAM",
@@ -112,11 +112,6 @@ SET "Date of Last SAM" = lsm."Date of Last SAM",
 FROM last_sam_mam lsm
 WHERE growth_report."Beneficiary ID" = lsm."Individual ID";
 
-
--- remove enrolment date check
--- all left join
--- join with individual.id
--- remove distinct
 
 ---------------------------------------NRC status script-----------------------
 WITH cte_nrc_status AS (SELECT DISTINCT ind.id  AS "Individual ID",
@@ -137,7 +132,8 @@ WITH cte_nrc_status AS (SELECT DISTINCT ind.id  AS "Individual ID",
                                  LEFT JOIN apfodisha.individual_child_nrc_admission nrc
                                            ON nrc.individual_id = qrt.individual_id
                                                AND qrt.encounter_date_time IS NOT null
-                                               and qrt.last_modified_date_time > :date)
+                        WHERE (qrt.last_modified_date_time > :previousCutoffDateTime AND qrt.last_modified_date_time <= :newCutoffDateTime)
+                           OR (nrc.last_modified_date_time > :previousCutoffDateTime AND nrc.last_modified_date_time <= :newCutoffDateTime))
 UPDATE apfodisha.individual_child_growth_monitoring_report growth_report
 SET "Was the child admitted to NRC before" = cte."Was the child admitted to NRC before"
 FROM cte_nrc_status cte
@@ -145,8 +141,6 @@ WHERE growth_report."Beneficiary ID" = cte."Individual ID";
 
 
 ---------------------------------Relapse Child Script------------------------------------------------------
-
-
 WITH relapse_data AS (SELECT DISTINCT ind.id  AS "Individual ID",
                                       CASE
                                           WHEN EXISTS (SELECT 1
@@ -154,14 +148,18 @@ WITH relapse_data AS (SELECT DISTINCT ind.id  AS "Individual ID",
                                                        WHERE f.individual_id = follow_up.individual_id
                                                          AND f.program_enrolment_id = follow_up.program_enrolment_id
                                                          AND f."Weight for Height Status" = 'SAM'
-                                                         AND f.encounter_date_time < date_trunc('month', CURRENT_DATE) - INTERVAL '1 month' * :month_interval)
+                                                         AND f.encounter_date_time < date_trunc('month', CURRENT_DATE) - INTERVAL '1 month' * :month_interval
+                                                         AND f.last_modified_date_time > :previousCutoffDateTime 
+                                                         AND f.last_modified_date_time <= :newCutoffDateTime)
                                               AND follow_up."Weight for Height Status" = 'SAM'
                                               AND NOT EXISTS (SELECT 1
                                                               FROM apfodisha.individual_child_growth_monitoring f2
                                                               WHERE f2.individual_id = follow_up.individual_id
                                                                 AND f2.program_enrolment_id = follow_up.program_enrolment_id
                                                                 AND f2."Weight for Height Status" = 'SAM'
-                                                                AND f2.encounter_date_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month' * :month_interval)
+                                                                AND f2.encounter_date_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month' * :month_interval
+                                                                AND f2.last_modified_date_time > :previousCutoffDateTime 
+                                                                AND f2.last_modified_date_time <= :newCutoffDateTime)
                                               THEN 'Yes'
                                           ELSE 'No'
                                           END AS "Is it a relapse child"
@@ -174,7 +172,8 @@ WITH relapse_data AS (SELECT DISTINCT ind.id  AS "Individual ID",
                                   follow_up.program_enrolment_id = enrl.id
                               AND follow_up.encounter_date_time IS NOT NULL
                               AND follow_up.is_voided = false
-                              and follow_up.last_modified_date_time > :date)
+                              AND follow_up.last_modified_date_time > :previousCutoffDateTime 
+                              AND follow_up.last_modified_date_time <= :newCutoffDateTime)
 UPDATE apfodisha.individual_child_growth_monitoring_report growth_report
 SET "Is it a relapse child" = cte."Is it a relapse child"
 FROM relapse_data cte
@@ -182,8 +181,6 @@ WHERE growth_report."Beneficiary ID" = cte."Individual ID";
 
 
 ---------------------------------------Village Fields Update script---------------------------------------
-
-
 WITH village_fields AS (SELECT village."Block",
                                village."GP",
                                village."Village/Hamlet",
@@ -202,8 +199,6 @@ WHERE growth_report."Beneficiary ID" = fld."Individual ID";
 
 
 ---------------------------------------AWC fields update script------------------------------------------------
-
-
 WITH awc_fields AS (SELECT awc."Project/Block",
                            awc."Sector",
                            awc."AWC",
@@ -229,8 +224,6 @@ WHERE growth_report."Beneficiary ID" = fld."Individual ID";
 
 
 ----------------------------------Growth monitoring fields update scripts---------------------------------------------
-
-
 WITH growth_monitoring_fields AS (SELECT CASE
                                              WHEN follow_up."Weight for age Status" = 'Severely Underweight' THEN 'Yes'
                                              ELSE 'No'
@@ -293,7 +286,9 @@ WITH growth_monitoring_fields AS (SELECT CASE
                                           AND irt.name IN ('Mother-Son', 'Mother-Daughter')
                                            LEFT JOIN apfodisha.individual mother ON
                                               mother.id = ir.individual_a_id
-                                          AND mother.is_voided = false)
+                                          AND mother.is_voided = false
+                                          AND follow_up.last_modified_date_time > :previousCutoffDateTime 
+                                          AND follow_up.last_modified_date_time <= :newCutoffDateTime)
 UPDATE
     apfodisha.individual_child_growth_monitoring_report growth_report
 SET "Severely Underweight"                                          = fld."Severely Underweight",
@@ -324,7 +319,6 @@ WHERE growth_report."Beneficiary ID" = fld."Individual ID";
 
 
 --------------------------------------Update individual Fields script-----------------------------------------------------------
-
 UPDATE apfodisha.individual_child_growth_monitoring_report report
 SET report."Beneficiary ID"              = ind.id,
     report."Name of Child Benefeciaries" = CONCAT(ind.first_name, ' ', ind.last_name),
@@ -341,7 +335,5 @@ FROM apfodisha.individual ind
         AND follow_up.encounter_date_time IS NOT NULL
         AND follow_up.is_voided = false
 WHERE ind.is_voided = false
-  AND ind.last_modified_date_time > :input_date
+  AND (ind.last_modified_date_time > :previousCutoffDateTime AND ind.last_modified_date_time <= :newCutoffDateTime)
   AND report."Beneficiary ID" = ind.id;
-
-
