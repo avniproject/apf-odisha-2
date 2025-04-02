@@ -1,0 +1,57 @@
+{
+  "ddl": [
+    {
+      "table": "individual_child_growth_monitoring_report",
+      "sql": "table-create.sql"
+    }
+  ],
+  "dml": [
+    {
+      "order": 1,
+      "table": "individual_child_growth_monitoring_report",
+      "sqls": [
+        {
+          "order": 1,
+          "sourceTableName": "individual",
+          "insert-sql": "individual-insert.sql",
+          "update-sqls": []
+        },
+        {
+          "order": 2,
+          "sourceTableName": "individual_child_growth_monitoring",
+          "insert-sql": "",
+          "update-sqls": [
+            "sam-mam-update.sql",
+            "nrc-status-update.sql",
+            "relapse-update.sql",
+            "growth-monitoring-fields-update.sql"
+          ]
+        },
+        {
+          "order": 3,
+          "sourceTableName": "address_level",
+          "insert-sql": "",
+          "update-sqls": [
+            "village-fields-update.sql"
+          ]
+        },
+        {
+          "order": 4,
+          "sourceTableName": "individual_child_awc_mapping",
+          "insert-sql": "",
+          "update-sqls": [
+            "awc-fields-update.sql"
+          ]
+        },
+        {
+          "order": 5,
+          "sourceTableName": "individual",
+          "insert-sql": "",
+          "update-sqls": [
+            "individual-fields-update.sql"
+          ]
+        }
+      ]
+    }
+  ]
+}
