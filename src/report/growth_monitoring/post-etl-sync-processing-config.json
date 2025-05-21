@@ -38,14 +38,6 @@
         },
         {
           "order": 4,
-          "sourceTableName": "individual_child_awc_mapping",
-          "insert-sql": "",
-          "update-sqls": [
-            "icgmr-awc-fields-update.sql"
-          ]
-        },
-        {
-          "order": 5,
           "sourceTableName": "individual",
           "insert-sql": "",
           "update-sqls": [
